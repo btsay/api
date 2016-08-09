@@ -9,9 +9,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
-	"github.com/labstack/echo/middleware"
 	"github.com/btlike/api/utils"
 	"github.com/btlike/database/torrent"
 	"gopkg.in/olivere/elastic.v3"
@@ -109,6 +106,11 @@ func initTrend() (err error) {
 	return
 }
 
+func encoding(v interface{}) []byte {
+	b, _ := json.Marshal(v)
+	return b
+}
+
 //Run the server
 func Run(address string) {
 	err := initTrend()
@@ -116,16 +118,16 @@ func Run(address string) {
 		utils.Log().Println(err)
 	}
 
-	e := echo.New()
-	e.Get("/list", func(c echo.Context) error {
-		keyword := c.QueryParam("keyword")
+	http.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		keyword := r.Form.Get("keyword")
 		keyword, _ = url.QueryUnescape(keyword)
 		if keyword == "" {
-			return nil
+			return
 		}
 
 		var page int
-		pg := c.QueryParam("page")
+		pg := r.Form.Get("page")
 		if pg == "" {
 			page = 1
 		} else {
@@ -148,12 +150,13 @@ func Run(address string) {
 		var resp searchResp
 		//返回所有视频都不存在
 		if utils.Config.Pause {
-			return c.JSON(http.StatusOK, resp)
+			w.Write(encoding(resp))
+			return
 		}
 
 		query := elastic.NewMatchQuery("Name", keyword)
 		search := utils.Config.ElasticClient.Search().Index("torrent").Query(query)
-		order := c.QueryParam("order")
+		order := r.Form.Get("order")
 		if order == "l" {
 			search = search.Sort("CreateTime", false)
 		}
@@ -170,7 +173,7 @@ func Run(address string) {
 			Do() // execute
 		if err != nil {
 			// Handle error
-			c.JSON(http.StatusInternalServerError, nil)
+			w.WriteHeader(500)
 		}
 
 		if searchResult.Hits != nil {
@@ -196,48 +199,55 @@ func Run(address string) {
 				resp.Torrent = append(resp.Torrent, item)
 			}
 		}
-
-		return c.JSON(http.StatusOK, resp)
+		w.Write(encoding(resp))
+		return
 	})
 
-	e.Get("/detail", func(c echo.Context) error {
-		id := c.QueryParam("id")
+	http.HandleFunc("/detail", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+
+		id := r.Form.Get("id")
 		if id == "" {
-			return nil
+			return
 		}
 
 		var item torrentData
 		if utils.Config.Pause {
-			return c.JSON(http.StatusOK, item)
+			w.Write(encoding(item))
+			return
 		}
 
 		has, content := getTorrent(id)
 		if !has {
-			return nil
+			return
 		}
 
 		err := json.Unmarshal([]byte(content), &item)
 		if err != nil {
 			utils.Log().Println(err)
-			return err
+			return
 		}
-
-		return c.JSON(http.StatusOK, item)
+		w.Write(encoding(item))
+		return
 	})
 
-	e.Get("/recommend", func(c echo.Context) error {
+	http.HandleFunc("/recommend", func(w http.ResponseWriter, r *http.Request) {
 		var data []torrent.Recommend
 		utils.Config.Engine.OrderBy("id").Find(&data)
-		return c.JSON(http.StatusOK, data)
+		w.Write(encoding(data))
+		return
 	})
 
-	e.Get("/trend", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, trends)
+	http.HandleFunc("/trend", func(w http.ResponseWriter, r *http.Request) {
+		w.Write(encoding(trends))
+		return
 	})
 
 	utils.Log().Println("running on", address)
-	e.Use(middleware.CORS())
-	e.Run(standard.New(address))
+	err = http.ListenAndServe(address, nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func isVideo(name string) bool {
