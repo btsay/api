@@ -46,7 +46,7 @@ func initConfig() {
 		Address  string `json:"address"`
 	}
 
-	f, err := os.Open("config/crawl.conf")
+	f, err := os.Open("config/api.conf")
 	exit(err)
 	b, err := ioutil.ReadAll(f)
 	exit(err)
