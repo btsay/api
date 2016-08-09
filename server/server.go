@@ -11,6 +11,7 @@ import (
 
 	"github.com/btlike/api/utils"
 	"github.com/btlike/database/torrent"
+	"github.com/rs/cors"
 	"gopkg.in/olivere/elastic.v3"
 )
 
@@ -117,8 +118,8 @@ func Run(address string) {
 	if err != nil {
 		utils.Log().Println(err)
 	}
-
-	http.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		keyword := r.Form.Get("keyword")
 		keyword, _ = url.QueryUnescape(keyword)
@@ -203,7 +204,7 @@ func Run(address string) {
 		return
 	})
 
-	http.HandleFunc("/detail", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/detail", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 
 		id := r.Form.Get("id")
@@ -231,20 +232,21 @@ func Run(address string) {
 		return
 	})
 
-	http.HandleFunc("/recommend", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/recommend", func(w http.ResponseWriter, r *http.Request) {
 		var data []torrent.Recommend
 		utils.Config.Engine.OrderBy("id").Find(&data)
 		w.Write(encoding(data))
 		return
 	})
 
-	http.HandleFunc("/trend", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/trend", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(encoding(trends))
 		return
 	})
 
 	utils.Log().Println("running on", address)
-	err = http.ListenAndServe(address, nil)
+	handler := cors.Default().Handler(mux)
+	err = http.ListenAndServe(address, handler)
 	if err != nil {
 		panic(err)
 	}
