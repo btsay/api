@@ -151,10 +151,18 @@ func Run(address string) {
 		var resp searchResp
 		//返回所有视频都不存在
 		if utils.Config.Pause {
+			var data []torrent.Recommend
+			utils.Config.Engine.OrderBy("id").Find(&data)
+			for _, v := range data {
+				if keyword == v.Name {
+					goto pass
+				}
+			}
 			w.Write(encoding(resp))
 			return
 		}
 
+	pass:
 		query := elastic.NewMatchQuery("Name", keyword)
 		search := utils.Config.ElasticClient.Search().Index("torrent").Query(query)
 		order := r.Form.Get("order")
@@ -213,10 +221,12 @@ func Run(address string) {
 		}
 
 		var item torrentData
-		if utils.Config.Pause {
-			w.Write(encoding(item))
-			return
-		}
+		/*
+			if utils.Config.Pause {
+				w.Write(encoding(item))
+				return
+			}
+		*/
 
 		has, content := getTorrent(id)
 		if !has {
