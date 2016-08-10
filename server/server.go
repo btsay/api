@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -151,12 +152,19 @@ func Run(address string) {
 		var resp searchResp
 		//返回所有视频都不存在
 		if utils.Config.Pause {
+			//如果在推荐列表中，直接搜索
 			var data []torrent.Recommend
 			utils.Config.Engine.OrderBy("id").Find(&data)
 			for _, v := range data {
 				if keyword == v.Name {
 					goto pass
 				}
+			}
+			if len(data) > 0 {
+				//如果不在推荐列表中，在推荐列表中随机选择一个进行搜索
+				index := rand.Intn(len(data))
+				keyword = data[index].Name
+				goto pass
 			}
 			w.Write(encoding(resp))
 			return
