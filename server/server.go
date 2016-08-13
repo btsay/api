@@ -21,14 +21,12 @@ const (
 	PageSize = 20
 )
 
-//ddefine var
+//define var
 var (
-	VideoFormats = []string{"webm", "mkv", "flv", "vob", "ogv", "ogg", "drc", "gif",
+	videoFormats = []string{"webm", "mkv", "flv", "vob", "ogv", "ogg", "drc", "gif",
 		"gifv", "mng", "avi", "mov", "wmv", "yuv", "rm", "rmvb", "asf", "amv", "mp4", "m4p",
 		"m4v", "mpg", "mp2", "mpeg", "mpe", "mpv", "m2v", "svi", "3gp", "3g2", "mxf", "roq", "nsv", "f4v",
 		"f4p", "f4a", "f4b"}
-
-	trends []trend
 )
 
 func isChineseChar(str string) bool {
@@ -40,74 +38,6 @@ func isChineseChar(str string) bool {
 	return false
 }
 
-func initTrend() (err error) {
-	go func() {
-		for {
-			var ts []trend
-			// dt := elastic.NewDateRangeAggregation()
-			// dt = dt.BetweenWithKey("CreateTime", time.Now().Add(-time.Hour*24*30), time.Now())
-			result, err := utils.Config.ElasticClient.Search().Index("torrent").Type("infohash").Sort("Heat", false).Size(1000).Do()
-			if err != nil {
-				utils.Log().Println(err)
-				time.Sleep(time.Hour)
-				continue
-			}
-			if result != nil && result.Hits != nil {
-				for _, v := range result.Hits.Hits {
-					var esdata esData
-					json.Unmarshal(*v.Source, &esdata)
-
-					// if !isChineseChar(esdata.Name) && len(esdata.Name) > 20 {
-					// continue
-					// }
-
-					// if len(esdata.Name) > 20 {
-					// continue
-					// }
-
-					exist, content := getTorrent(v.Id)
-					if !exist {
-						continue
-					}
-					var td torrentData
-					err = json.Unmarshal([]byte(content), &td)
-					if err != nil {
-						continue
-					}
-					for _, file := range td.Files {
-						if isVideo(file.Name) {
-							ts = append(ts, trend{
-								ID:         v.Id,
-								Name:       td.Name,
-								CreateTime: td.CreateTime,
-								Length:     td.Length,
-								Heat:       esdata.Heat,
-							})
-							if len(ts) >= 100 {
-								trends = make([]trend, 0)
-								for _, v := range ts {
-									trends = append(trends, v)
-								}
-								goto done
-							}
-						}
-						//只处理第一个文件（也是最大的文件）
-						break
-					}
-				}
-				trends = make([]trend, 0)
-				for _, v := range ts {
-					trends = append(trends, v)
-				}
-				goto done
-			}
-		done:
-			time.Sleep(time.Hour)
-		}
-	}()
-	return
-}
-
 func encoding(v interface{}) []byte {
 	b, _ := json.Marshal(v)
 	return b
@@ -115,10 +45,12 @@ func encoding(v interface{}) []byte {
 
 //Run the server
 func Run(address string) {
-	err := initTrend()
+	err := getTrend()
 	if err != nil {
 		utils.Log().Println(err)
+		return
 	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
@@ -171,7 +103,7 @@ func Run(address string) {
 		}
 
 	pass:
-		query := elastic.NewMatchQuery("Name", keyword)
+		query := elastic.NewMatchPhrasePrefixQuery("Name", keyword)
 		search := utils.Config.ElasticClient.Search().Index("torrent").Query(query)
 		order := r.Form.Get("order")
 		if order == "l" {
@@ -229,13 +161,6 @@ func Run(address string) {
 		}
 
 		var item torrentData
-		/*
-			if utils.Config.Pause {
-				w.Write(encoding(item))
-				return
-			}
-		*/
-
 		has, content := getTorrent(id)
 		if !has {
 			return
@@ -258,7 +183,12 @@ func Run(address string) {
 	})
 
 	mux.HandleFunc("/trend", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(encoding(trends))
+		tp := r.Form.Get("type")
+		if tp == "week" {
+			w.Write(encoding(weekTrends))
+		} else {
+			w.Write(encoding(monthTrends))
+		}
 		return
 	})
 
@@ -278,7 +208,7 @@ func isVideo(name string) bool {
 
 	if index := strings.LastIndex(name, "."); index > 0 {
 		format := name[index+1:]
-		for _, v := range VideoFormats {
+		for _, v := range videoFormats {
 			if v == format {
 				return true
 			}
