@@ -22,9 +22,9 @@ func getMonthTrend(latest time.Time) {
 	for {
 		section := elastic.NewRangeQuery("CreateTime").Gte(latest.Add(-time.Hour * 24 * 30).Format(TIME))
 		var trends []trend
-		result, err := utils.Config.ElasticClient.Search().Index("torrent").Type("infohash").Query(section).Sort("Heat", false).Size(1000).Do()
+		result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Query(section).Sort("Heat", false).Size(1000).Do()
 		if err != nil {
-			utils.Log().Println(err)
+			utils.Log.Println(err)
 			time.Sleep(time.Hour)
 			continue
 		}
@@ -32,25 +32,24 @@ func getMonthTrend(latest time.Time) {
 			for _, v := range result.Hits.Hits {
 				var esdata esData
 				json.Unmarshal(*v.Source, &esdata)
-				exist, content := getTorrent(v.Id)
-				if !exist {
-					continue
-				}
-				var td torrentData
-				err = json.Unmarshal([]byte(content), &td)
+				trt, err := utils.Repostory.GetTorrentByInfohash(v.Id)
 				if err != nil {
 					continue
 				}
-				if len(td.Name) > 40 {
+				if len(trt.Name) == 0 {
 					continue
 				}
-				for _, file := range td.Files {
+				if len(trt.Name) > 40 {
+					continue
+				}
+
+				for _, file := range trt.Files {
 					if isVideo(file.Name) {
 						trends = append(trends, trend{
 							ID:         v.Id,
-							Name:       td.Name,
+							Name:       trt.Name,
 							CreateTime: esdata.CreateTime,
-							Length:     td.Length,
+							Length:     trt.Length,
 							Heat:       esdata.Heat,
 						})
 						if len(trends) >= 100 {
@@ -80,9 +79,9 @@ func getWeekTrend(latest time.Time) {
 	for {
 		section := elastic.NewRangeQuery("CreateTime").Gte(latest.Add(-time.Hour * 24 * 7).Format(TIME))
 		var trends []trend
-		result, err := utils.Config.ElasticClient.Search().Index("torrent").Type("infohash").Query(section).Sort("Heat", false).Size(1000).Do()
+		result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Query(section).Sort("Heat", false).Size(1000).Do()
 		if err != nil {
-			utils.Log().Println(err)
+			utils.Log.Println(err)
 			time.Sleep(time.Hour)
 			continue
 		}
@@ -90,25 +89,23 @@ func getWeekTrend(latest time.Time) {
 			for _, v := range result.Hits.Hits {
 				var esdata esData
 				json.Unmarshal(*v.Source, &esdata)
-				exist, content := getTorrent(v.Id)
-				if !exist {
-					continue
-				}
-				var td torrentData
-				err = json.Unmarshal([]byte(content), &td)
+				trt, err := utils.Repostory.GetTorrentByInfohash(v.Id)
 				if err != nil {
 					continue
 				}
-				if len(td.Name) > 40 {
+				if len(trt.Name) == 0 {
 					continue
 				}
-				for _, file := range td.Files {
+				if len(trt.Name) > 40 {
+					continue
+				}
+				for _, file := range trt.Files {
 					if isVideo(file.Name) {
 						trends = append(trends, trend{
 							ID:         v.Id,
-							Name:       td.Name,
+							Name:       trt.Name,
 							CreateTime: esdata.CreateTime,
-							Length:     td.Length,
+							Length:     trt.Length,
 							Heat:       esdata.Heat,
 						})
 						if len(trends) >= 100 {
@@ -135,9 +132,9 @@ func getWeekTrend(latest time.Time) {
 }
 
 func getTrend() (err error) {
-	result, err := utils.Config.ElasticClient.Search().Index("torrent").Type("infohash").Sort("CreateTime", false).Size(1).Do()
+	result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Sort("CreateTime", false).Size(1).Do()
 	if err != nil {
-		utils.Log().Println(err)
+		utils.Log.Println(err)
 		return
 	}
 
