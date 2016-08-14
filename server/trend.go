@@ -32,7 +32,7 @@ func getMonthTrend(latest time.Time) {
 			for _, v := range result.Hits.Hits {
 				var esdata esData
 				json.Unmarshal(*v.Source, &esdata)
-				trt, err := utils.Repostory.GetTorrentByInfohash(v.Id)
+				trt, err := utils.Repository.GetTorrentByInfohash(v.Id)
 				if err != nil {
 					continue
 				}
@@ -89,7 +89,7 @@ func getWeekTrend(latest time.Time) {
 			for _, v := range result.Hits.Hits {
 				var esdata esData
 				json.Unmarshal(*v.Source, &esdata)
-				trt, err := utils.Repostory.GetTorrentByInfohash(v.Id)
+				trt, err := utils.Repository.GetTorrentByInfohash(v.Id)
 				if err != nil {
 					continue
 				}

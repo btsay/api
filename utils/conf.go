@@ -14,7 +14,7 @@ import (
 var (
 	Config        config
 	Log           *log.Logger
-	Repostory     repository.Repository
+	Repository    repository.Repository
 	ElasticClient *elastic.Client
 )
 
@@ -56,7 +56,7 @@ func initLog() {
 func initDatabase() {
 	repo, err := repository.NewMysqlRepository(Config.Database, 1024, 1024)
 	exit(err)
-	Repostory = repo
+	Repository = repo
 }
 
 func exit(err error) {

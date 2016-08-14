@@ -72,7 +72,7 @@ func Run(address string) {
 			}
 		}
 
-		e := utils.Repostory.CreateHistory(keyword, r.RemoteAddr)
+		e := utils.Repository.CreateHistory(keyword, r.RemoteAddr)
 		if e != nil {
 			utils.Log.Println(e)
 		}
@@ -81,7 +81,7 @@ func Run(address string) {
 		//返回所有视频都不存在
 		if utils.Config.Pause {
 			//如果在推荐列表中，直接搜索
-			data, _ := utils.Repostory.GetRecommend()
+			data, _ := utils.Repository.GetRecommend()
 			for _, v := range data {
 				if keyword == v {
 					goto pass
@@ -123,7 +123,7 @@ func Run(address string) {
 		if searchResult.Hits != nil {
 			resp.Count = searchResult.Hits.TotalHits
 			for _, v := range searchResult.Hits.Hits {
-				trt, err := utils.Repostory.GetTorrentByInfohash(v.Id)
+				trt, err := utils.Repository.GetTorrentByInfohash(v.Id)
 				if err != nil {
 					continue
 				}
@@ -150,7 +150,7 @@ func Run(address string) {
 		if id == "" {
 			return
 		}
-		item, err := utils.Repostory.GetTorrentByInfohash(id)
+		item, err := utils.Repository.GetTorrentByInfohash(id)
 		if err != nil {
 			return
 		}
@@ -160,7 +160,7 @@ func Run(address string) {
 
 	mux.HandleFunc("/recommend", func(w http.ResponseWriter, r *http.Request) {
 		var data []recommend
-		rec, err := utils.Repostory.GetRecommend()
+		rec, err := utils.Repository.GetRecommend()
 		if err != nil {
 			return
 		}
