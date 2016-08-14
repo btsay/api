@@ -15,8 +15,8 @@ type trend struct {
 }
 
 type recommend struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID   int
+	Name string
 }
 
 type esData struct {
@@ -29,10 +29,4 @@ type esData struct {
 type searchResp struct {
 	Torrent []repository.Torrent
 	Count   int64
-}
-
-//Infohash define db model
-type Infohash struct {
-	ID   string `xorm:"'id'"`
-	Data string `xorm:"'data'"`
 }
