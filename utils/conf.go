@@ -19,10 +19,10 @@ var (
 )
 
 type config struct {
-	Database string `json:"database"`
-	Elastic  string `json:"elastic"`
-	Address  string `json:"address"`
-	Pause    bool   `json:"pause"`
+	Database        string `json:"database"`
+	Elastic         string `json:"elastic"`
+	Address         string `json:"address"`
+	KeywordProvider string `json:"keyword_provider"`
 }
 
 //Init utilsl
@@ -31,6 +31,7 @@ func Init() {
 	initConfig()
 	initDatabase()
 	initElastic()
+	initKeyword()
 }
 
 func initElastic() {
