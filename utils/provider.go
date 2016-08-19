@@ -33,8 +33,8 @@ func (p *keyword) InBlackList(s string) bool {
 }
 
 func initKeyword() {
-	url := "http://obu2kw0g0.bkt.clouddn.com/keyword.json"
-	if len(Config.KeywordProvider) == 0 {
+	url := "http://obu2kw0g0.bkt.clouddn.com/Keyword.json"
+	if len(Config.KeywordProvider) != 0 {
 		url = Config.KeywordProvider
 	}
 	resp, err := http.Get(url)
