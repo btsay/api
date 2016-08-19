@@ -134,7 +134,7 @@ func getWeekTrend(latest time.Time) {
 func getTrend() (err error) {
 	result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Sort("CreateTime", false).Size(1).Do()
 	if err != nil {
-		utils.Log.Println(err)
+		utils.Log.Printf("如果未抓取数据，此报错不予理会，先运行crawl即可。原始错误:%v\n", err)
 		return
 	}
 

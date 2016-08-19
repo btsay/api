@@ -43,11 +43,7 @@ func encoding(v interface{}) []byte {
 
 //Run the server
 func Run(address string) {
-	err := getTrend()
-	if err != nil {
-		utils.Log.Println(err)
-		return
-	}
+	getTrend()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +179,7 @@ func Run(address string) {
 
 	utils.Log.Println("running on", address)
 	handler := cors.Default().Handler(mux)
-	err = http.ListenAndServe(address, handler)
+	err := http.ListenAndServe(address, handler)
 	if err != nil {
 		panic(err)
 	}
