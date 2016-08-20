@@ -39,9 +39,9 @@ func getMonthTrend(latest time.Time) {
 				if len(trt.Name) == 0 {
 					continue
 				}
-				if len(trt.Name) > 40 {
-					continue
-				}
+				// if len(trt.Name) > 40 {
+				// continue
+				// }
 
 				for _, file := range trt.Files {
 					if isVideo(file.Name) {
