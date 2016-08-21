@@ -22,7 +22,7 @@ func getMonthTrend(latest time.Time) {
 	for {
 		section := elastic.NewRangeQuery("CreateTime").Gte(latest.Add(-time.Hour * 24 * 30).Format(TIME))
 		var trends []trend
-		result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Query(section).Sort("Heat", false).Size(1000).Do()
+		result, err := utils.ElasticClient.Search().Index("torrent").Query(section).Sort("Heat", false).Size(1000).Do()
 		if err != nil {
 			utils.Log.Println(err)
 			time.Sleep(time.Hour)
@@ -79,7 +79,7 @@ func getWeekTrend(latest time.Time) {
 	for {
 		section := elastic.NewRangeQuery("CreateTime").Gte(latest.Add(-time.Hour * 24 * 7).Format(TIME))
 		var trends []trend
-		result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Query(section).Sort("Heat", false).Size(1000).Do()
+		result, err := utils.ElasticClient.Search().Index("torrent").Query(section).Sort("Heat", false).Size(1000).Do()
 		if err != nil {
 			utils.Log.Println(err)
 			time.Sleep(time.Hour)
@@ -132,7 +132,7 @@ func getWeekTrend(latest time.Time) {
 }
 
 func getTrend() (err error) {
-	result, err := utils.ElasticClient.Search().Index("torrent").Type("infohash").Sort("CreateTime", false).Size(1).Do()
+	result, err := utils.ElasticClient.Search().Index("torrent").Sort("CreateTime", false).Size(1).Do()
 	if err != nil {
 		utils.Log.Printf("如果未抓取数据，此报错不予理会，先运行crawl即可。原始错误:%v\n", err)
 		return
