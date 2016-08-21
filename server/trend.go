@@ -71,7 +71,7 @@ func getMonthTrend(latest time.Time) {
 			goto done
 		}
 	done:
-		time.Sleep(time.Hour * 12)
+		time.Sleep(time.Hour)
 	}
 }
 
@@ -127,7 +127,7 @@ func getWeekTrend(latest time.Time) {
 			goto done
 		}
 	done:
-		time.Sleep(time.Hour * 6)
+		time.Sleep(time.Hour)
 	}
 }
 
