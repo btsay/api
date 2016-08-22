@@ -16,6 +16,7 @@ var (
 	Log           *log.Logger
 	Repository    repository.Repository
 	ElasticClient *elastic.Client
+	Demo          bool
 )
 
 type config struct {

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -74,6 +75,24 @@ func Run(address string) {
 		}
 
 		var resp searchResp
+		if utils.Demo {
+			//如果在推荐列表中，直接搜索
+			data, _ := utils.Repository.GetRecommend()
+			for _, v := range data {
+				if keyword == v {
+					goto pass
+				}
+			}
+			if len(data) > 0 {
+				//如果不在推荐列表中，在推荐列表中随机选择一个进行搜索
+				index := rand.Intn(len(data))
+				keyword = data[index]
+				goto pass
+			}
+			w.Write(encoding(resp))
+			return
+		}
+
 		if utils.Keyword.InBlackList(keyword) {
 			utils.Log.Println("搜索条件在黑名单中", keyword)
 			w.Write(encoding(resp))
@@ -86,6 +105,7 @@ func Run(address string) {
 			return
 		}
 
+	pass:
 		query := elastic.NewMatchPhrasePrefixQuery("Name", keyword)
 		search := utils.ElasticClient.Search().Index("torrent").Query(query)
 		order := r.Form.Get("order")
