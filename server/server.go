@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/btlike/api/utils"
@@ -166,6 +167,32 @@ func Run(address string) {
 			w.Write(encoding(monthTrends))
 		}
 		return
+	})
+
+	mux.HandleFunc("/state", func(w http.ResponseWriter, r *http.Request) {
+		var state struct {
+			CountTorrent      int64
+			TodayStoreTorrent int64
+		}
+		count, err := utils.ElasticClient.Count("torrent").Do()
+		if err != nil {
+			utils.Log.Println(err)
+			w.Write(encoding(state))
+			return
+		}
+		state.CountTorrent = count
+
+		year, month, day := time.Now().Date()
+		begin := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+		query := elastic.NewRangeQuery("CreateTime").Gte(begin.Format(TIME))
+		today, err := elastic.NewCountService(utils.ElasticClient).Index("torrent").Query(query).Do()
+		if err != nil {
+			utils.Log.Println(err)
+			w.Write(encoding(state))
+			return
+		}
+		state.TodayStoreTorrent = today
+		w.Write(encoding(state))
 	})
 
 	utils.Log.Println("running on", address)
