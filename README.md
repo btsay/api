@@ -181,6 +181,23 @@
     }
     ```
 
+- 获取平台资源数据
+
+  - 请求
+
+    ```http
+    GET /state
+    ```
+
+  - 返回
+
+    ```json
+    {
+      "CountTorrent": 122,  //平台资源总数
+      "TodayStoreTorrent": 16  //当日抓取数据
+    }
+    ```
+
     ​
 
-  ​
+​
