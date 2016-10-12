@@ -93,17 +93,17 @@ func Run(address string) {
 			return
 		}
 
-		if utils.Keyword.InBlackList(keyword) {
-			utils.Log.Println("搜索条件在黑名单中", keyword)
-			w.Write(encoding(resp))
-			return
-		}
+		// if utils.Keyword.InBlackList(keyword) {
+		// 	utils.Log.Println("搜索条件在黑名单中", keyword)
+		// 	w.Write(encoding(resp))
+		// 	return
+		// }
 
-		if !utils.Keyword.InWhiteList(keyword) {
-			utils.Log.Println("搜索条件不在白名单中", keyword)
-			w.Write(encoding(resp))
-			return
-		}
+		// if !utils.Keyword.InWhiteList(keyword) {
+		// 	utils.Log.Println("搜索条件不在白名单中", keyword)
+		// 	w.Write(encoding(resp))
+		// 	return
+		// }
 
 	pass:
 		query := elastic.NewMatchPhrasePrefixQuery("Name", keyword)
