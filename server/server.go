@@ -131,6 +131,7 @@ func Run(address string) {
 		if searchResult.Hits != nil {
 			resp.Count = searchResult.Hits.TotalHits
 			utils.Log.Println("TotalHits:", resp.Count)
+			utils.Log.Println("currentpageHits:", len(searchResult.Hits.Hits))
 			for _, v := range searchResult.Hits.Hits {
 				trt, err := utils.Repository.GetTorrentByInfohash(v.Id)
 				if err != nil {
@@ -138,6 +139,7 @@ func Run(address string) {
 					continue
 				}
 				if len(trt.Name) == 0 {
+					utils.Log.Println("trt:", trt)
 					continue
 				}
 				var tdata esData
