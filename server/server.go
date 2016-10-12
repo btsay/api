@@ -130,9 +130,11 @@ func Run(address string) {
 
 		if searchResult.Hits != nil {
 			resp.Count = searchResult.Hits.TotalHits
+			utils.Log.Println("TotalHits:", resp.Count)
 			for _, v := range searchResult.Hits.Hits {
 				trt, err := utils.Repository.GetTorrentByInfohash(v.Id)
 				if err != nil {
+					utils.Log.Println(err)
 					continue
 				}
 				if len(trt.Name) == 0 {
