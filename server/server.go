@@ -139,7 +139,7 @@ func Run(address string) {
 					continue
 				}
 				if len(trt.Name) == 0 {
-					utils.Log.Println("trt:", trt)
+					utils.Log.Println("infohash:", v.Id)
 					continue
 				}
 				var tdata esData
