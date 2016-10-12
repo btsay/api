@@ -3,7 +3,7 @@ package server
 import (
 	"time"
 
-	"github.com/btlike/repository"
+	"github.com/btsay/repository"
 )
 
 type trend struct {

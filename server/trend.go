@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/btlike/api/utils"
+	"github.com/btsay/api/utils"
 	"gopkg.in/olivere/elastic.v3"
 )
 

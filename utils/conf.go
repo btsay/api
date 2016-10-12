@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/btlike/repository"
+	"github.com/btsay/repository"
 	"gopkg.in/olivere/elastic.v3"
 )
 

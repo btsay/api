@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/btlike/api/server"
-	"github.com/btlike/api/utils"
+	"github.com/btsay/api/server"
+	"github.com/btsay/api/utils"
 	_ "github.com/go-sql-driver/mysql"
 )
 

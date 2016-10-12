@@ -10,7 +10,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/btlike/api/utils"
+	"github.com/btsay/api/utils"
 	"github.com/rs/cors"
 	"gopkg.in/olivere/elastic.v3"
 )

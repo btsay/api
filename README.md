@@ -1,5 +1,5 @@
 ## api服务
-[![Build Status](https://drone.io/github.com/btlike/api/status.png)](https://drone.io/github.com/btlike/api/latest)
+[![Build Status](https://drone.io/github.com/btsay/api/status.png)](https://drone.io/github.com/btsay/api/latest)
 
 ### 基础接口
 
@@ -9,7 +9,7 @@
 - 首页推荐
 
 ### 安装
-`go get github.com/btlike/api`
+`go get github.com/btsay/api`
 
 
 
